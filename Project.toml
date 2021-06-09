@@ -1,0 +1,13 @@
+name = "Grader"
+uuid = "d440d0cf-a03a-4c3f-a45e-240b6b8fa1ca"
+authors = ["Chris Tessum <ctessum@gmail.com> and contributors"]
+version = "0.1.0"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
