@@ -1,5 +1,7 @@
 module Grader
 
+export Problem, run!, grade!, evalasmodule
+
 using Parameters
 import Random
 
