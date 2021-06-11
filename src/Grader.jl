@@ -1,9 +1,10 @@
 module Grader
 
-export Problem, run!, grade!, evalasmodule
+export Problem, rungolden!, runstudent!, grade!, pl_JSON
 
 using Parameters
 import Random
+import JSON
 
 @with_kw mutable struct Image
     label::String = ""
@@ -40,9 +41,8 @@ function evalasmodule(code::AbstractString)
     eval(expr)
 end
 
-function run!(p::Problem, goldencode::AbstractString, studentcode::AbstractString)
+function rungolden!(p::Problem, goldencode::AbstractString)::Module
     goldenresult = Module()
-    studentresult = Module()
     try
         goldenresult = evalasmodule(goldencode)
     catch err
@@ -50,7 +50,11 @@ function run!(p::Problem, goldencode::AbstractString, studentcode::AbstractStrin
         p.gradable = false
         p.message = "Internal grading error, please notify instructor."
     end
+    return goldenresult
+end
 
+function runstudent!(p::Problem, studentcode::AbstractString)::Module
+    studentresult = Module()
     try
         studentresult = evalasmodule(studentcode)
     catch err
@@ -58,8 +62,9 @@ function run!(p::Problem, goldencode::AbstractString, studentcode::AbstractStrin
         p.gradable = false
         p.message = "There was an error running your code, please see information below."
     end
-    return (goldenresult, studentresult)
+    return studentresult
 end
+
 
 function grade!(p::Problem, name::String, description::String, points::Int, expr::Expr, msg_if_incorrect::String)
     if !p.gradable 
@@ -90,6 +95,10 @@ function grade!(p::Problem, name::String, description::String, points::Int, expr
     end
     p.score = float(pts) / float(totalpts)
     return nothing
+end
+
+function pl_JSON(io::IO, p::Problem)
+    JSON.print(io, p)
 end
 
 end
