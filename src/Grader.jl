@@ -77,11 +77,7 @@ function grade!(p::Problem, name::String, description::String, points::Int, expr
     try 
         correct = eval(expr)
     catch err
-        if isa(err, UndefVarError)
-            t.output = t.output * "\n" * sprint(showerror, err)
-        else
-            rethrow(err)
-        end
+        t.output = t.output * "\n" * sprint(showerror, err)
     end
     correct ? t.points = points : t.message = msg_if_incorrect
     
