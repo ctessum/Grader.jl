@@ -131,37 +131,66 @@ using Test
             @test p.tests[1].output == "\nUndefVarError: y not defined"
             @test p.tests[1].message == "y is incorrect"
         end
-
-        @testset "pl_JSON" begin
-            goldencode = """x=2
-            y = x * 3
-            z = y + 2
+ 
+        @testset "type conversion error" begin
+            studentcode = """
+            function fib(n::Int)::Int
+                nothing
+            end
             """
-            studentcode = """x=2
-            y = x + x + x
-            z = y + 3
+            goldencode = """
+            function fib(n::Int)::Int
+                if n <= 1
+                    return n
+                else
+                    return fib(n - 1) + fib(n - 2)
+                end
+            end
             """
 
-            p = Problem()            
+            p = Problem()
             golden = rungolden!(p, goldencode)
             student = runstudent!(p, studentcode)
 
-            grade!(p, "y", "check y", 2, :($student.y ≈ $golden.y), "y is incorrect")
-            grade!(p, "z", "check z", 8, :($student.z ≈ $golden.z), "z is incorrect")
+            Grader.grade!(p, "fib(1)", "Check fib(1)", 1, :($student.fib(1) ≈ $golden.fib(1)), "fib(1) is incorrect")
+            Grader.grade!(p, "fib(7)", "Check fib(7)", 2, :($student.fib(7) ≈ $golden.fib(7)), "fib(7) is incorrect")
+            Grader.grade!(p, "fib(7)", "Check fib(7)", 2, :($golden.fib(7) ≈ $golden.fib(7)), "fib(7) is incorrect")
 
-            s = IOBuffer()
-            pl_JSON(s, p)
-            jsondata = String(take!(s))
-
-            @test jsondata == """{"gradable":true,"score":0.2,"message":"","output":"","images":[],"tests":[{"name":"y","description":"check y","points":2,"max_points":2,"message":"","output":"","images":[]},{"name":"z","description":"check z","points":0,"max_points":8,"message":"z is incorrect","output":"","images":[]}]}"""
-
-            @test length(p.tests) == 2
-            @test p.tests[1].max_points == 2
-            @test p.tests[2].max_points == 8
-            @test p.tests[1].points == 2
-            @test p.tests[2].points == 0
-            @test p.tests[2].message == "z is incorrect"
-            @test p.score ≈ 0.2
+            @test p.score == 2.0/5.0
+            @test occursin( "Cannot `convert`", p.tests[1].output)
+            @test p.tests[1].message == "fib(1) is incorrect"
         end
+    end
+
+    @testset "pl_JSON" begin
+        goldencode = """x=2
+        y = x * 3
+        z = y + 2
+        """
+        studentcode = """x=2
+        y = x + x + x
+        z = y + 3
+        """
+
+        p = Problem()            
+        golden = rungolden!(p, goldencode)
+        student = runstudent!(p, studentcode)
+
+        grade!(p, "y", "check y", 2, :($student.y ≈ $golden.y), "y is incorrect")
+        grade!(p, "z", "check z", 8, :($student.z ≈ $golden.z), "z is incorrect")
+
+        s = IOBuffer()
+        pl_JSON(s, p)
+        jsondata = String(take!(s))
+
+        @test jsondata == """{"gradable":true,"score":0.2,"message":"","output":"","images":[],"tests":[{"name":"y","description":"check y","points":2,"max_points":2,"message":"","output":"","images":[]},{"name":"z","description":"check z","points":0,"max_points":8,"message":"z is incorrect","output":"","images":[]}]}"""
+
+        @test length(p.tests) == 2
+        @test p.tests[1].max_points == 2
+        @test p.tests[2].max_points == 8
+        @test p.tests[1].points == 2
+        @test p.tests[2].points == 0
+        @test p.tests[2].message == "z is incorrect"
+        @test p.score ≈ 0.2
     end
 end
