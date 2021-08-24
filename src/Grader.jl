@@ -14,8 +14,8 @@ end
 @with_kw mutable struct TestResult
     name::String = ""
     description::String = ""
-    points::Int = 0
-    max_points::Int = 0
+    points::Float64 = 0
+    max_points::Float64 = 0
     message::String = ""
     output::String = ""
     images::Vector{Image} = []
@@ -23,7 +23,7 @@ end
 
 @with_kw mutable struct Problem
     gradable::Bool = true
-    score::AbstractFloat = 0
+    score::Float64 = 0
     message::String = ""
     output::String = ""
 
@@ -66,7 +66,7 @@ function runstudent!(p::Problem, studentcode::AbstractString)::Module
 end
 
 
-function grade!(p::Problem, name::String, description::String, points::Int, expr::Expr, msg_if_incorrect::String)
+function grade!(p::Problem, name::String, description::String, points::Real, expr::Expr, msg_if_incorrect::String)
     if !p.gradable 
         return nothing
     end

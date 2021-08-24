@@ -50,8 +50,8 @@ using Test
             grade!(p, "y", "check y", 2, :($student.y ≈ $golden.y), "y is incorrect")
 
             @test length(p.tests) == 1
-            @test p.tests[1].max_points == 2
-            @test p.tests[1].points == 2
+            @test p.tests[1].max_points ≈ 2
+            @test p.tests[1].points ≈ 2
             @test p.score ≈ 1
         end
 
@@ -73,10 +73,10 @@ using Test
             grade!(p, "z", "check z", 8, :($student.z ≈ $golden.z), "z is incorrect")
 
             @test length(p.tests) == 2
-            @test p.tests[1].max_points == 2
-            @test p.tests[2].max_points == 8
-            @test p.tests[1].points == 2
-            @test p.tests[2].points == 0
+            @test p.tests[1].max_points ≈ 2
+            @test p.tests[2].max_points ≈ 8
+            @test p.tests[1].points ≈ 2
+            @test p.tests[2].points ≈ 0
             @test p.tests[2].message == "z is incorrect"
             @test p.score ≈ 0.2
         end
@@ -156,7 +156,7 @@ using Test
             Grader.grade!(p, "fib(7)", "Check fib(7)", 2, :($student.fib(7) ≈ $golden.fib(7)), "fib(7) is incorrect")
             Grader.grade!(p, "fib(7)", "Check fib(7)", 2, :($golden.fib(7) ≈ $golden.fib(7)), "fib(7) is incorrect")
 
-            @test p.score == 2.0/5.0
+            @test p.score ≈ 2.0/5.0
             @test occursin( "Cannot `convert`", p.tests[1].output)
             @test p.tests[1].message == "fib(1) is incorrect"
         end
@@ -183,13 +183,13 @@ using Test
         pl_JSON(s, p)
         jsondata = String(take!(s))
 
-        @test jsondata == """{"gradable":true,"score":0.2,"message":"","output":"","images":[],"tests":[{"name":"y","description":"check y","points":2,"max_points":2,"message":"","output":"","images":[]},{"name":"z","description":"check z","points":0,"max_points":8,"message":"z is incorrect","output":"","images":[]}]}"""
+        @test jsondata == """{"gradable":true,"score":0.2,"message":"","output":"","images":[],"tests":[{"name":"y","description":"check y","points":2.0,"max_points":2.0,"message":"","output":"","images":[]},{"name":"z","description":"check z","points":0.0,"max_points":8.0,"message":"z is incorrect","output":"","images":[]}]}"""
 
         @test length(p.tests) == 2
-        @test p.tests[1].max_points == 2
-        @test p.tests[2].max_points == 8
-        @test p.tests[1].points == 2
-        @test p.tests[2].points == 0
+        @test p.tests[1].max_points ≈ 2
+        @test p.tests[2].max_points ≈ 8
+        @test p.tests[1].points ≈ 2
+        @test p.tests[2].points ≈ 0
         @test p.tests[2].message == "z is incorrect"
         @test p.score ≈ 0.2
     end
