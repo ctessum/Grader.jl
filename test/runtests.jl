@@ -99,6 +99,24 @@ using Test
             @test p.message == "There was an error running your code, please see information below."
         end
 
+        @testset "missing value in student code" begin
+            goldencode = """x=2
+            y = x * 3
+            """
+            studentcode = """x=2
+            y = missing
+            """
+
+            p = Problem()
+            golden = rungolden!(p, goldencode)
+            student = runstudent!(p, studentcode)
+
+            grade!(p, "y", "check y", 2, :($student.y ≈ $golden.y), "y is incorrect")
+
+            @test p.gradable
+            @test p.tests[1].message == "your answer contains a 'missing' value"
+        end
+
         @testset "error in golden code" begin
             goldencode = """x=2
             y = x * 3y

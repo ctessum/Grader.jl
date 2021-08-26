@@ -36,7 +36,7 @@ end
 # and return the resulting module. May not 
 # work if expected if the code string already is a module.
 function evalasmodule(code::AbstractString)
-    mod = "module "*Random.randstring(Random.MersenneTwister(), "abcdefghijklmnopqrstuvwxyz", 20)*"\n" * code * "\nend"
+    mod = "module " * Random.randstring(Random.MersenneTwister(), "abcdefghijklmnopqrstuvwxyz", 20) * "\n" * code * "\nend"
     expr = Meta.parse(mod)
     eval(expr)
 end
@@ -46,7 +46,7 @@ function rungolden!(p::Problem, goldencode::AbstractString)::Module
     try
         goldenresult = evalasmodule(goldencode)
     catch err
-        p.output = p.output * "error running golden code:\n"*sprint(showerror, err, backtrace()) * "\n"
+        p.output = p.output * "error running golden code:\n" * sprint(showerror, err, backtrace()) * "\n"
         p.gradable = false
         p.message = "Internal grading error, please notify instructor."
     end
@@ -58,7 +58,7 @@ function runstudent!(p::Problem, studentcode::AbstractString)::Module
     try
         studentresult = evalasmodule(studentcode)
     catch err
-        p.output = p.output * "error running student code:\n"*sprint(showerror, err, backtrace()) * "\n"
+        p.output = p.output * "error running student code:\n" * sprint(showerror, err, backtrace()) * "\n"
         p.gradable = false
         p.message = "There was an error running your code, please see information below."
     end
@@ -79,15 +79,25 @@ function grade!(p::Problem, name::String, description::String, points::Real, exp
     catch err
         t.output = t.output * "\n" * sprint(showerror, err)
     end
-    correct ? t.points = points : t.message = msg_if_incorrect
-    
+
+    if correct === missing
+        t.message = "your answer contains a 'missing' value"
+    else
+        try
+            correct ? t.points = points : t.message = msg_if_incorrect
+        catch err
+            t.message = msg_if_incorrect
+            t.output = t.output * "\n" * sprint(showerror, err)
+        end
+    end
+
     append!(p.tests, [t])
 
     pts = 0
     totalpts = 0
     for t in p.tests
         pts += t.points
-        totalpts += t.max_points
+    totalpts += t.max_points
     end
     p.score = float(pts) / float(totalpts)
     return nothing
