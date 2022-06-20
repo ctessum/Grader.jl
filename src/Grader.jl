@@ -6,11 +6,17 @@ using Parameters
 import Random
 import JSON
 
+"""
+Represents an image with a label and url.
+"""
 @with_kw mutable struct Image
     label::String = ""
     url::String = ""
 end
 
+"""
+Represents the result of a `grade!` action.
+"""
 @with_kw mutable struct TestResult
     name::String = ""
     description::String = ""
@@ -21,6 +27,18 @@ end
     images::Vector{Image} = []
 end
 
+"""
+Represent a problem for grading.
+
+Fields:
+- Gradable: whether the problem is gradable, i.e. whether the all relavent code
+    has executed without any errors
+- Score: the score of the problem, as a fraction of the maximum possible score
+- Message: Any message associated with the graded problem
+- Output: The output of the problem grading
+- Images: Any images associated with the problem grading
+- Tests: A list of tests associated with the problem
+"""
 @with_kw mutable struct Problem
     gradable::Bool = true
     score::Float64 = 0
@@ -32,15 +50,21 @@ end
     tests::Vector{TestResult} = []
 end
 
-# Evaluate the provided code string inside a module,
-# and return the resulting module. May not 
-# work if expected if the code string already is a module.
+"""
+Evaluate the provided code string inside a module,
+and return the resulting module. May not 
+work if expected if the code string already is a module.
+"""
 function evalasmodule(code::AbstractString)
     mod = "module " * Random.randstring(Random.MersenneTwister(), "abcdefghijklmnopqrstuvwxyz", 20) * "\n" * code * "\nend"
     expr = Meta.parse(mod)
     eval(expr)
 end
 
+"""
+Run the provided code string inside a module and return the module. If an error occurs it will be logged in 
+`Problem` `p` as a problem with the "golden" code.
+"""
 function rungolden!(p::Problem, goldencode::AbstractString)::Module
     goldenresult = Module()
     try
@@ -53,6 +77,10 @@ function rungolden!(p::Problem, goldencode::AbstractString)::Module
     return goldenresult
 end
 
+"""
+Run the provided code string inside a module and return the module. If an error occurs it will be logged in 
+`Problem` `p` as a problem with the "student" code.
+"""
 function runstudent!(p::Problem, studentcode::AbstractString)::Module
     studentresult = Module()
     try
@@ -65,7 +93,14 @@ function runstudent!(p::Problem, studentcode::AbstractString)::Module
     return studentresult
 end
 
+"""
+Add a grade for problem `p`. This grade will have the given `name` and `description` in the grader output,
+and will be associated with the number of `points`. 
 
+The function will evaluate the given expression `expr`; if it evaluates to true, the given number 
+of `points` will be awarded, otherwise zero points will be awarded and `msg_if_incorrect` will be 
+logged to the problem `p`.
+"""
 function grade!(p::Problem, name::String, description::String, points::Real, expr::Expr, msg_if_incorrect::String)
     if !p.gradable 
         return nothing
@@ -103,6 +138,13 @@ function grade!(p::Problem, name::String, description::String, points::Real, exp
     return nothing
 end
 
+
+"""
+    pl_JSON(io::IO, p::Problem)
+
+Write a the contents of the `Problem` `p` to the IO stream `io`
+as a [PrairieLearn](https://prairielearn.readthedocs.io/en/latest/)-compatible JSON file.
+"""
 function pl_JSON(io::IO, p::Problem)
     JSON.print(io, p)
 end
