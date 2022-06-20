@@ -124,6 +124,12 @@ pl_JSON(b, p)
 JSON.print(JSON.parse(String(take!(b))), 4)
 
 # output
+┌ Warning: Package Grader does not have Plots in its dependencies:
+│ - If you have Grader checked out for development and have
+│   added Plots as a dependency but haven't updated your primary
+│   environment's manifest file, try `Pkg.resolve()`.
+│ - Otherwise you may need to report an issue with Grader
+└ Loading Plots into Grader from project dependency, future warnings for Grader are suppressed.
 {
     "images": [],
     "score": 1.0,
