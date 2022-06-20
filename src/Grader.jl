@@ -62,6 +62,8 @@ function evalasmodule(code::AbstractString)
 end
 
 """
+    rungolden!(p::Problem, goldencode::AbstractString)::Module
+
 Run the provided code string inside a module and return the module. If an error occurs it will be logged in 
 `Problem` `p` as a problem with the "golden" code.
 """
@@ -78,6 +80,8 @@ function rungolden!(p::Problem, goldencode::AbstractString)::Module
 end
 
 """
+    runstudent!(p::Problem, studentcode::AbstractString)::Module
+
 Run the provided code string inside a module and return the module. If an error occurs it will be logged in 
 `Problem` `p` as a problem with the "student" code.
 """
@@ -94,6 +98,8 @@ function runstudent!(p::Problem, studentcode::AbstractString)::Module
 end
 
 """
+    grade!(p::Problem, name::String, description::String, points::Real, expr::Expr, msg_if_incorrect::String)
+
 Add a grade for problem `p`. This grade will have the given `name` and `description` in the grader output,
 and will be associated with the number of `points`. 
 
