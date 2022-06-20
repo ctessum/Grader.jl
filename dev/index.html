@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Home · Grader.jl</title><script data-outdated-warner src="assets/warner.js"></script><link rel="canonical" href="https://ctessum.github.io/Grader.jl/"/><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.044/juliamono.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.11/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href>Grader.jl</a></span></div><form class="docs-search" action="search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li class="is-active"><a class="tocitem" href>Home</a><ul class="internal"><li class="toplevel"><a class="tocitem" href="#Examples"><span>Examples</span></a></li><li><a class="tocitem" href="#Simple-example"><span>Simple example</span></a></li><li><a class="tocitem" href="#Example-with-incorrect-answer"><span>Example with incorrect answer</span></a></li><li><a class="tocitem" href="#Example-with-plot"><span>Example with plot</span></a></li><li class="toplevel"><a class="tocitem" href="#API-Documentation"><span>API Documentation</span></a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Home</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Home</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/ctessum/Grader.jl/blob/main/docs/src/index.md#" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Grader.jl-Documentation"><a class="docs-heading-anchor" href="#Grader.jl-Documentation">Grader.jl Documentation</a><a id="Grader.jl-Documentation-1"></a><a class="docs-heading-anchor-permalink" href="#Grader.jl-Documentation" title="Permalink"></a></h1><p><a href="https://github.com/ctessum/Grader.jl">Grader</a> is an assignment autograder for Julia. It has been designed to be used with the <a href="https://prairielearn.readthedocs.io/en/latest/">PrairieLearn</a> learning system,  but it could also be used with any other learning system.</p><h1 id="Examples"><a class="docs-heading-anchor" href="#Examples">Examples</a><a id="Examples-1"></a><a class="docs-heading-anchor-permalink" href="#Examples" title="Permalink"></a></h1><h2 id="Simple-example"><a class="docs-heading-anchor" href="#Simple-example">Simple example</a><a id="Simple-example-1"></a><a class="docs-heading-anchor-permalink" href="#Simple-example" title="Permalink"></a></h2><p>Here is a simple example of how to use Grader:</p><pre><code class="language-julia hljs">using Grader 
+
+# This is the code with the correct answer:
+goldencode = &quot;&quot;&quot;
+x=2
+y = x * 3
+&quot;&quot;&quot;
+
+# This is the code with the student&#39;s answer:
+studentcode = &quot;&quot;&quot;
+x=2
+y = x + x + x
+&quot;&quot;&quot;
+
+p = Problem()
+golden = rungolden!(p, goldencode)
+student = runstudent!(p, studentcode)
+
+grade!(p, &quot;y&quot;, &quot;check y&quot;, 2, :($student.y ≈ $golden.y), &quot;y is incorrect&quot;)
+p
+
+# output
+
+Problem
+  gradable: Bool true
+  score: Float64 1.0
+  message: String &quot;&quot;
+  output: String &quot;&quot;
+  images: Array{Grader.Image}((0,))
+  tests: Array{Grader.TestResult}((1,))</code></pre><h2 id="Example-with-incorrect-answer"><a class="docs-heading-anchor" href="#Example-with-incorrect-answer">Example with incorrect answer</a><a id="Example-with-incorrect-answer-1"></a><a class="docs-heading-anchor-permalink" href="#Example-with-incorrect-answer" title="Permalink"></a></h2><p>Here&#39;s an example of what it looks like when the student gets the wrong answer:</p><pre><code class="language-julia hljs">using Grader
+
+# This is the code with the correct answer:
+goldencode = &quot;&quot;&quot;
+x=2
+y = x * 3
+&quot;&quot;&quot;
+
+# This is the code with the student&#39;s answer:
+studentcode = &quot;&quot;&quot;
+x=2
+y = x + x + 2x
+&quot;&quot;&quot;
+
+p = Problem()
+golden = rungolden!(p, goldencode)
+student = runstudent!(p, studentcode)
+
+grade!(p, &quot;y&quot;, &quot;check y&quot;, 2, :($student.y ≈ $golden.y), &quot;y is incorrect&quot;)
+p.tests[1]
+
+# output
+Grader.TestResult
+  name: String &quot;y&quot;
+  description: String &quot;check y&quot;
+  points: Float64 0.0
+  max_points: Float64 2.0
+  message: String &quot;y is incorrect&quot;
+  output: String &quot;&quot;
+  images: Array{Grader.Image}((0,))</code></pre><h2 id="Example-with-plot"><a class="docs-heading-anchor" href="#Example-with-plot">Example with plot</a><a id="Example-with-plot-1"></a><a class="docs-heading-anchor-permalink" href="#Example-with-plot" title="Permalink"></a></h2><p>This is a more complex example that grades a plot and writes out the output as JSON.</p><pre><code class="language-julia hljs">using Grader
+using LinearAlgebra, JSON
+
+studentcode = &quot;&quot;&quot;
+using Plots
+x=1:10
+y = x.^2
+xy = plot(x,y)
+&quot;&quot;&quot;
+
+p = Problem()
+student = runstudent!(p, studentcode)
+
+grade!(p, &quot;XY Plot&quot;, &quot;Data length&quot;, 1, 
+    quote
+        xlen = length($student.xy[1][1][:x])
+        ylen = length($student.xy[1][1][:y])
+        xlen == ylen == 10
+    end, 
+    &quot;the number of data points in x or y is incorrect&quot;)
+
+grade!(p, &quot;XY Plot&quot;, &quot;Y values&quot;, 3, 
+    quote
+        ynorm = $norm($student.xy[1][1][:y])
+        ynorm ≈ 159.16343801262903
+    end, 
+    &quot;The Y values are not correct&quot;)
+
+# Output to JSON and print the result
+b = IOBuffer()
+pl_JSON(b, p)
+JSON.print(JSON.parse(String(take!(b))), 4)
+
+# output
+┌ Warning: Package Grader does not have Plots in its dependencies:
+│ - If you have Grader checked out for development and have
+│   added Plots as a dependency but haven&#39;t updated your primary
+│   environment&#39;s manifest file, try `Pkg.resolve()`.
+│ - Otherwise you may need to report an issue with Grader
+└ Loading Plots into Grader from project dependency, future warnings for Grader are suppressed.
+{
+    &quot;images&quot;: [],
+    &quot;score&quot;: 1.0,
+    &quot;output&quot;: &quot;&quot;,
+    &quot;message&quot;: &quot;&quot;,
+    &quot;gradable&quot;: true,
+    &quot;tests&quot;: [
+        {
+            &quot;images&quot;: [],
+            &quot;name&quot;: &quot;XY Plot&quot;,
+            &quot;points&quot;: 1.0,
+            &quot;output&quot;: &quot;&quot;,
+            &quot;message&quot;: &quot;&quot;,
+            &quot;max_points&quot;: 1.0,
+            &quot;description&quot;: &quot;Data length&quot;
+        },
+        {
+            &quot;images&quot;: [],
+            &quot;name&quot;: &quot;XY Plot&quot;,
+            &quot;points&quot;: 3.0,
+            &quot;output&quot;: &quot;&quot;,
+            &quot;message&quot;: &quot;&quot;,
+            &quot;max_points&quot;: 3.0,
+            &quot;description&quot;: &quot;Y values&quot;
+        }
+    ]
+}</code></pre><h1 id="API-Documentation"><a class="docs-heading-anchor" href="#API-Documentation">API Documentation</a><a id="API-Documentation-1"></a><a class="docs-heading-anchor-permalink" href="#API-Documentation" title="Permalink"></a></h1><ul><li><a href="#Grader.Image"><code>Grader.Image</code></a></li><li><a href="#Grader.Problem"><code>Grader.Problem</code></a></li><li><a href="#Grader.TestResult"><code>Grader.TestResult</code></a></li><li><a href="#Grader.evalasmodule-Tuple{AbstractString}"><code>Grader.evalasmodule</code></a></li><li><a href="#Grader.grade!-Tuple{Problem, String, String, Real, Expr, String}"><code>Grader.grade!</code></a></li><li><a href="#Grader.pl_JSON-Tuple{IO, Problem}"><code>Grader.pl_JSON</code></a></li><li><a href="#Grader.rungolden!-Tuple{Problem, AbstractString}"><code>Grader.rungolden!</code></a></li><li><a href="#Grader.runstudent!-Tuple{Problem, AbstractString}"><code>Grader.runstudent!</code></a></li></ul><article class="docstring"><header><a class="docstring-binding" id="Grader.Image" href="#Grader.Image"><code>Grader.Image</code></a> — <span class="docstring-category">Type</span></header><section><div><p>Represents an image with a label and url.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/ctessum/Grader.jl/blob/161c2822a80faab83f4a9e219100bdb3483cfd91/src/Grader.jl#L9-L11">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="Grader.Problem" href="#Grader.Problem"><code>Grader.Problem</code></a> — <span class="docstring-category">Type</span></header><section><div><p>Represent a problem for grading.</p><p>Fields:</p><ul><li>Gradable: whether the problem is gradable, i.e. whether the all relavent code   has executed without any errors</li><li>Score: the score of the problem, as a fraction of the maximum possible score</li><li>Message: Any message associated with the graded problem</li><li>Output: The output of the problem grading</li><li>Images: Any images associated with the problem grading</li><li>Tests: A list of tests associated with the problem</li></ul></div><a class="docs-sourcelink" target="_blank" href="https://github.com/ctessum/Grader.jl/blob/161c2822a80faab83f4a9e219100bdb3483cfd91/src/Grader.jl#L30-L41">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="Grader.TestResult" href="#Grader.TestResult"><code>Grader.TestResult</code></a> — <span class="docstring-category">Type</span></header><section><div><p>Represents the result of a <code>grade!</code> action.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/ctessum/Grader.jl/blob/161c2822a80faab83f4a9e219100bdb3483cfd91/src/Grader.jl#L17-L19">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="Grader.evalasmodule-Tuple{AbstractString}" href="#Grader.evalasmodule-Tuple{AbstractString}"><code>Grader.evalasmodule</code></a> — <span class="docstring-category">Method</span></header><section><div><p>Evaluate the provided code string inside a module, and return the resulting module. May not  work if expected if the code string already is a module.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/ctessum/Grader.jl/blob/161c2822a80faab83f4a9e219100bdb3483cfd91/src/Grader.jl#L53-L57">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="Grader.grade!-Tuple{Problem, String, String, Real, Expr, String}" href="#Grader.grade!-Tuple{Problem, String, String, Real, Expr, String}"><code>Grader.grade!</code></a> — <span class="docstring-category">Method</span></header><section><div><p>Add a grade for problem <code>p</code>. This grade will have the given <code>name</code> and <code>description</code> in the grader output, and will be associated with the number of <code>points</code>. </p><p>The function will evaluate the given expression <code>expr</code>; if it evaluates to true, the given number  of <code>points</code> will be awarded, otherwise zero points will be awarded and <code>msg_if_incorrect</code> will be  logged to the problem <code>p</code>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/ctessum/Grader.jl/blob/161c2822a80faab83f4a9e219100bdb3483cfd91/src/Grader.jl#L96-L103">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="Grader.pl_JSON-Tuple{IO, Problem}" href="#Grader.pl_JSON-Tuple{IO, Problem}"><code>Grader.pl_JSON</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia hljs">pl_JSON(io::IO, p::Problem)</code></pre><p>Write a the contents of the <code>Problem</code> <code>p</code> to the IO stream <code>io</code> as a <a href="https://prairielearn.readthedocs.io/en/latest/">PrairieLearn</a>-compatible JSON file.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/ctessum/Grader.jl/blob/161c2822a80faab83f4a9e219100bdb3483cfd91/src/Grader.jl#L142-L147">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="Grader.rungolden!-Tuple{Problem, AbstractString}" href="#Grader.rungolden!-Tuple{Problem, AbstractString}"><code>Grader.rungolden!</code></a> — <span class="docstring-category">Method</span></header><section><div><p>Run the provided code string inside a module and return the module. If an error occurs it will be logged in  <code>Problem</code> <code>p</code> as a problem with the &quot;golden&quot; code.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/ctessum/Grader.jl/blob/161c2822a80faab83f4a9e219100bdb3483cfd91/src/Grader.jl#L64-L67">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="Grader.runstudent!-Tuple{Problem, AbstractString}" href="#Grader.runstudent!-Tuple{Problem, AbstractString}"><code>Grader.runstudent!</code></a> — <span class="docstring-category">Method</span></header><section><div><p>Run the provided code string inside a module and return the module. If an error occurs it will be logged in  <code>Problem</code> <code>p</code> as a problem with the &quot;student&quot; code.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/ctessum/Grader.jl/blob/161c2822a80faab83f4a9e219100bdb3483cfd91/src/Grader.jl#L80-L83">source</a></section></article></article><nav class="docs-footer"><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.19 on <span class="colophon-date" title="Monday 20 June 2022 20:39">Monday 20 June 2022</span>. Using Julia version 1.7.3.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
