@@ -174,8 +174,8 @@ using Test
             Grader.grade!(p, "fib(7)", "Check fib(7)", 2, :($student.fib(7) ≈ $golden.fib(7)), "fib(7) is incorrect")
             Grader.grade!(p, "fib(7)", "Check fib(7)", 2, :($golden.fib(7) ≈ $golden.fib(7)), "fib(7) is incorrect")
 
-            @test p.score ≈ 2.0/5.0
-            @test occursin( "Cannot `convert`", p.tests[1].output)
+            @test p.score ≈ 2.0 / 5.0
+            @test occursin("Cannot `convert`", p.tests[1].output)
             @test p.tests[1].message == "fib(1) is incorrect"
         end
     end
@@ -210,5 +210,26 @@ using Test
         @test p.tests[2].points ≈ 0
         @test p.tests[2].message == "z is incorrect"
         @test p.score ≈ 0.2
+    end
+
+    @testset "fill answers" begin
+        code = """
+        # Calculate the area and perimeter of a cirle with radius 2.
+        r = 2
+        a = missing # Area
+        p = missing # Perimeter
+        """
+        
+        answer_code = fill_answers(code, Dict(
+            :(a = missing) => :(a = π * r^2),
+            :(p = missing) => :(p = 2π * r)))
+        
+        
+        p = Problem()
+        answer = runstudent!(p, answer_code)
+        grade!(p, "area", "calculate area", 1, :($answer.a ≈ 4π), "area is incorrect")
+        grade!(p, "perimeter", "calculate perimeter", 1, :($answer.p ≈ 4π), "perimeter is incorrect")
+        
+        @test p.score ≈ 1.0
     end
 end

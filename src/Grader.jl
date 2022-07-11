@@ -1,10 +1,11 @@
 module Grader
 
-export Problem, rungolden!, runstudent!, grade!, pl_JSON
+export Problem, rungolden!, runstudent!, grade!, pl_JSON, fill_answers
 
 using Parameters
 import Random
 import JSON
+import Espresso
 
 """
 Represents an image with a label and url.
@@ -56,9 +57,16 @@ and return the resulting module. May not
 work if expected if the code string already is a module.
 """
 function evalasmodule(code::AbstractString)
-    mod = "module " * Random.randstring(Random.MersenneTwister(), "abcdefghijklmnopqrstuvwxyz", 20) * "\n" * code * "\nend"
-    expr = Meta.parse(mod)
+    expr = asmodexpr(code)
     eval(expr)
+end
+
+"""
+Return an expression represent the given code inside of a module.
+"""
+function asmodexpr(code::AbstractString)
+    mod = "module " * Random.randstring(Random.MersenneTwister(), "abcdefghijklmnopqrstuvwxyz", 20) * "\n" * code * "\nend"
+    Meta.parse(mod)
 end
 
 """
@@ -108,14 +116,14 @@ of `points` will be awarded, otherwise zero points will be awarded and `msg_if_i
 logged to the problem `p`.
 """
 function grade!(p::Problem, name::String, description::String, points::Real, expr::Expr, msg_if_incorrect::String)
-    if !p.gradable 
+    if !p.gradable
         return nothing
     end
-    
+
     t = TestResult(max_points=points, name=name, description=description)
 
     correct = false
-    try 
+    try
         correct = eval(expr)
     catch err
         t.output = t.output * "\n" * sprint(showerror, err)
@@ -138,12 +146,52 @@ function grade!(p::Problem, name::String, description::String, points::Real, exp
     totalpts = 0
     for t in p.tests
         pts += t.points
-    totalpts += t.max_points
+        totalpts += t.max_points
     end
     p.score = float(pts) / float(totalpts)
     return nothing
 end
 
+@doc raw"""
+    fill_answers(code::AbstractString, answerkey::Dict)::String
+
+Fill the answer key into a code template and return the resulting code string.
+
+For example, consider the code template below, that gives the radius of
+a circle and asks the student to fill in the area and perimeter. In the 
+template, the area and perimeter are given as variables `a` and `p` 
+with values `missing`, and the student is meant to replace `missing`
+with the actual answer.
+
+``` jldoctest
+code = "# Calculate the area and perimeter of a circle with radius 2.\n"*
+"r = 2\n"*
+"a = missing # Area\n"*
+"p = missing # Perimeter\n"
+
+answer_code = fill_answers(code, Dict(
+    :(a = missing) => :(a = π * r^2),
+    :(p = missing) => :(p = 2π * r)));
+
+
+p = Problem()
+answer = runstudent!(p, answer_code)
+grade!(p, "area", "calculate area", 1, :($answer.a ≈ 4π), "area is incorrect")
+grade!(p, "perimeter", "calculate perimeter", 1, :($answer.p ≈ 4π), "perimeter is incorrect")
+
+println("Answer key score is $(p.score).")
+
+# output
+Answer key score is 1.0.
+```
+"""
+function fill_answers(code::AbstractString, answerkey::Dict)::String
+    expr = Meta.parse("begin\n $code \nend")
+    expr = Espresso.subs(expr, answerkey)
+    io = IOBuffer()
+    print(io, expr)
+    String(take!(io))
+end
 
 """
     pl_JSON(io::IO, p::Problem)
