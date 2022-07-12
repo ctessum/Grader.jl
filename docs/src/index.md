@@ -102,7 +102,7 @@ runstudent!(p, studentcode, [:LinearAlgebra])
 p.output[1:63]
 
 # output
-error running student code:\nUsing LinearAlgebra is not allowed.
+"error running student code:\nUsing LinearAlgebra is not allowed."
 
 ```
 
