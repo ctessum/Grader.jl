@@ -56,8 +56,13 @@ Evaluate the provided code string inside a module,
 and return the resulting module. May not 
 work if expected if the code string already is a module.
 """
-function evalasmodule(code::AbstractString)
+function evalasmodule(code::AbstractString, forbidden_symbols=[])
     expr = asmodexpr(code)
+    for symbol in forbidden_symbols
+        if length(Espresso.findex(symbol, expr)) > 0
+            error("Using $symbol is not allowed.")
+        end
+    end
     eval(expr)
 end
 
@@ -93,10 +98,10 @@ end
 Run the provided code string inside a module and return the module. If an error occurs it will be logged in 
 `Problem` `p` as a problem with the "student" code.
 """
-function runstudent!(p::Problem, studentcode::AbstractString)::Module
+function runstudent!(p::Problem, studentcode::AbstractString, forbidden_symbols=[])::Module
     studentresult = Module()
     try
-        studentresult = evalasmodule(studentcode)
+        studentresult = evalasmodule(studentcode, forbidden_symbols)
     catch err
         p.output = p.output * "error running student code:\n" * sprint(showerror, err, backtrace()) * "\n"
         p.gradable = false

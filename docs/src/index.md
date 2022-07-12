@@ -85,6 +85,27 @@ Grader.TestResult
   images: Array{Grader.Image}((0,))
 ```
 
+We can also forbid students from using certain symbols (e.g libraries):
+
+```jldoctest
+using Grader
+
+studentcode = """
+using LinearAlgebra
+x=2
+y = x + x + 2x
+"""
+
+p = Problem()
+runstudent!(p, studentcode, [:LinearAlgebra])
+
+p.output[1:63]
+
+# output
+error running student code:\nUsing LinearAlgebra is not allowed.
+
+```
+
 ## Example with plot
 
 This is a more complex example that grades a plot and writes out the output as JSON.

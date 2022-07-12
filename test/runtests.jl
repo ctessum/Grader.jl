@@ -149,6 +149,20 @@ using Test
             @test p.tests[1].output == "\nUndefVarError: y not defined"
             @test p.tests[1].message == "y is incorrect"
         end
+
+        @testset "forbidden symbol" begin
+            studentcode = """
+               using LinearAlgebra
+               x = 2
+            """
+
+            p = Problem()
+            student = runstudent!(p, studentcode, [:YYY :LinearAlgebra])
+
+
+            @test contains(p.output, "Using LinearAlgebra is not allowed.")
+            @test p.message == "There was an error running your code, please see information below."
+        end
  
         @testset "type conversion error" begin
             studentcode = """
