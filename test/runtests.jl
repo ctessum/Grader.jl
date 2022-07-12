@@ -160,7 +160,7 @@ using Test
             student = runstudent!(p, studentcode, [:YYY :LinearAlgebra])
 
 
-            @test contains(p.output, "Using LinearAlgebra is not allowed.")
+            @test occursin("Using LinearAlgebra is not allowed.", p.output)
             @test p.message == "There was an error running your code, please see information below."
         end
  
