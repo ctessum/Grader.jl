@@ -67,7 +67,7 @@ function evalasmodule(code::AbstractString, forbidden_symbols=[])
 end
 
 """
-Return an expression represent the given code inside of a module.
+Return an expression representing the given code inside of a module.
 """
 function asmodexpr(code::AbstractString)
     mod = "module " * Random.randstring(Random.MersenneTwister(), "abcdefghijklmnopqrstuvwxyz", 20) * "\n" * code * "\nend"
