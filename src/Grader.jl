@@ -186,7 +186,8 @@ function fill_answers(code::AbstractString, answerkey::Dict)::String
     expr = Espresso.subs(expr, answerkey)
     io = IOBuffer()
     print(io, expr)
-    String(take!(io))
+    s = String(take!(io))
+    replace(replace(s, r"end$"=>""), r"^begin"=>"") # remove begin and end added above
 end
 
 """

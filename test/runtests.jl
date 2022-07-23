@@ -250,6 +250,24 @@ using Test
         @test p.score ≈ 1.0
     end
 
+    @testset "fill answers 2" begin
+        code = """
+        using LinearAlgebra
+        using Markdown
+        n = missing
+        md\"\"\"Testing if markdown strings are okay.\"\"\"
+        """
+
+        answer_code = fill_answers(code, Dict(
+            :(n = missing) => :(n = LinearAlgebra.norm([1, 2, 3]))
+        ))
+
+        p = Problem()
+        answer = @runstudent! p answer_code
+        grade!(p, "norm", "calculate norm", 1, :($answer.n ≈ 3.7416573867739413), "norm is incorrect")
+        @test p.score ≈ 1.0
+    end
+
     @testset "plot" begin
         using LinearAlgebra
 
@@ -274,7 +292,6 @@ using Test
         grade!(p, "XY Plot", "Y values", 3,
             quote
                 ynorm = $norm($student.xy[1][1][:y])
-                println(ynorm)
                 ynorm ≈ 159.16343801262903
             end,
             "The Y values are not correct")
