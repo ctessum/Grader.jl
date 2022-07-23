@@ -1,6 +1,6 @@
 module Grader
 
-export Problem, rungolden!, runstudent!, grade!, pl_JSON, fill_answers
+export Problem, @rungolden!, @runstudent!, grade!, pl_JSON, fill_answers
 
 using Parameters
 import Random
@@ -52,21 +52,6 @@ Fields:
 end
 
 """
-Evaluate the provided code string inside a module,
-and return the resulting module. May not 
-work if expected if the code string already is a module.
-"""
-function evalasmodule(code::AbstractString, forbidden_symbols=[])
-    expr = asmodexpr(code)
-    for symbol in forbidden_symbols
-        if length(Espresso.findex(symbol, expr)) > 0
-            error("Using $symbol is not allowed.")
-        end
-    end
-    eval(expr)
-end
-
-"""
 Return an expression representing the given code inside of a module.
 """
 function asmodexpr(code::AbstractString)
@@ -75,40 +60,46 @@ function asmodexpr(code::AbstractString)
 end
 
 """
-    rungolden!(p::Problem, goldencode::AbstractString)::Module
+    rungolden! p::Problem goldencode::AbstractString
 
 Run the provided code string inside a module and return the module. If an error occurs it will be logged in 
 `Problem` `p` as a problem with the "golden" code.
 """
-function rungolden!(p::Problem, goldencode::AbstractString)::Module
-    goldenresult = Module()
-    try
-        goldenresult = evalasmodule(goldencode)
-    catch err
-        p.output = p.output * "error running golden code:\n" * sprint(showerror, err, backtrace()) * "\n"
-        p.gradable = false
-        p.message = "Internal grading error, please notify instructor."
-    end
-    return goldenresult
+macro rungolden!(p, goldencode)
+    runcode!(p, goldencode, [], "golden",  "Internal grading error, please notify instructor.")
 end
 
 """
-    runstudent!(p::Problem, studentcode::AbstractString)::Module
+    @runstudent! p::Problem studentcode::AbstractString
 
 Run the provided code string inside a module and return the module. If an error occurs it will be logged in 
 `Problem` `p` as a problem with the "student" code.
 """
-function runstudent!(p::Problem, studentcode::AbstractString, forbidden_symbols=[])::Module
-    studentresult = Module()
-    try
-        studentresult = evalasmodule(studentcode, forbidden_symbols)
-    catch err
-        p.output = p.output * "error running student code:\n" * sprint(showerror, err, backtrace()) * "\n"
-        p.gradable = false
-        p.message = "There was an error running your code, please see information below."
-    end
-    return studentresult
+macro runstudent!(p, studentcode, forbidden_symbols=[])
+    runcode!(p, studentcode, forbidden_symbols, "student", "There was an error running your code, please see information below.")
 end
+
+function runcode!(p, code, forbidden_symbols, codetype, errmessage)
+    return quote
+        local prob = $(esc(p))
+        local studentresult = Module()
+        try
+            local expr = Grader.asmodexpr($(esc(code)))
+            for symbol ∈ $(esc(forbidden_symbols))
+                if length(Espresso.findex(symbol, expr)) > 0
+                    error("Using $symbol is not allowed.")
+                end
+            end
+            studentresult = Base.eval(expr)
+        catch err
+            prob.output = prob.output * "error running $($(esc(codetype))) code:\n" * sprint(showerror, err, backtrace()) * "\n"
+            prob.gradable = false
+            prob.message = $(esc(errmessage))
+        end
+        studentresult
+    end
+end
+
 
 """
     grade!(p::Problem, name::String, description::String, points::Real, expr::Expr, msg_if_incorrect::String)

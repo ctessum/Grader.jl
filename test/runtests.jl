@@ -13,16 +13,18 @@ using Test
         z = 4
         """
 
-        golden_result = Grader.evalasmodule(golden_code)
-        student_result = Grader.evalasmodule(student_code)
+        p = Problem()
+
+        golden_result = @rungolden! p golden_code
+        student_result = @runstudent! p student_code
 
 
-        @testset "correct x" begin 
+        @testset "correct x" begin
             @test golden_result.x == student_result.x
         end
-        @testset "correct y" begin 
+        @testset "correct y" begin
             @test golden_result.y ≈ student_result.y
-        end    
+        end
         @testset "correct z only in student code" begin
             @test_throws UndefVarError golden_result.z
             @test student_result.z == 4
@@ -30,7 +32,9 @@ using Test
 
         @testset "Throws ParseError for syntax error" begin
             syntaxerr = "x= @@@"
-            @test_throws Base.Meta.ParseError Grader.evalasmodule(syntaxerr)
+            p = Problem()
+            @runstudent! p syntaxerr
+            @test occursin("ParseError", p.output)
         end
     end
 
@@ -44,8 +48,8 @@ using Test
             """
 
             p = Problem()
-            golden = rungolden!(p, goldencode)
-            student = runstudent!(p, studentcode)
+            golden = @rungolden! p goldencode
+            student = @runstudent! p studentcode
 
             grade!(p, "y", "check y", 2, :($student.y ≈ $golden.y), "y is incorrect")
 
@@ -65,9 +69,9 @@ using Test
             z = y + 3
             """
 
-            p = Problem()            
-            golden = rungolden!(p, goldencode)
-            student = runstudent!(p, studentcode)
+            p = Problem()
+            golden = @rungolden! p goldencode
+            student = @runstudent! p studentcode
 
             grade!(p, "y", "check y", 2, :($student.y ≈ $golden.y), "y is incorrect")
             grade!(p, "z", "check z", 8, :($student.z ≈ $golden.z), "z is incorrect")
@@ -90,8 +94,8 @@ using Test
             """
 
             p = Problem()
-            golden = rungolden!(p, goldencode)
-            student = runstudent!(p, studentcode)
+            golden = @rungolden! p goldencode
+            student = @runstudent! p studentcode
 
             grade!(p, "y", "check y", 2, :($student.y ≈ $golden.y), "y is incorrect")
 
@@ -108,8 +112,8 @@ using Test
             """
 
             p = Problem()
-            golden = rungolden!(p, goldencode)
-            student = runstudent!(p, studentcode)
+            golden = @rungolden! p goldencode
+            student = @runstudent! p studentcode
 
             grade!(p, "y", "check y", 2, :($student.y ≈ $golden.y), "y is incorrect")
 
@@ -126,8 +130,8 @@ using Test
             """
 
             p = Problem()
-            golden = rungolden!(p, goldencode)
-            student = runstudent!(p, studentcode)
+            golden = @rungolden! p goldencode
+            student = @runstudent! p studentcode
 
             @test !p.gradable
             @test p.message == "Internal grading error, please notify instructor."
@@ -141,8 +145,8 @@ using Test
             """
 
             p = Problem()
-            golden = rungolden!(p, goldencode)
-            student = runstudent!(p, studentcode)
+            golden = @rungolden! p goldencode
+            student = @runstudent! p studentcode
 
             grade!(p, "y", "check y", 2, :($student.y ≈ $golden.y), "y is incorrect")
 
@@ -157,13 +161,13 @@ using Test
             """
 
             p = Problem()
-            student = runstudent!(p, studentcode, [:YYY :LinearAlgebra])
+            student = @runstudent! p studentcode [:YYY :LinearAlgebra]
 
 
             @test occursin("Using LinearAlgebra is not allowed.", p.output)
             @test p.message == "There was an error running your code, please see information below."
         end
- 
+
         @testset "type conversion error" begin
             studentcode = """
             function fib(n::Int)::Int
@@ -181,8 +185,8 @@ using Test
             """
 
             p = Problem()
-            golden = rungolden!(p, goldencode)
-            student = runstudent!(p, studentcode)
+            golden = @rungolden! p goldencode
+            student = @runstudent! p studentcode
 
             Grader.grade!(p, "fib(1)", "Check fib(1)", 1, :($student.fib(1) ≈ $golden.fib(1)), "fib(1) is incorrect")
             Grader.grade!(p, "fib(7)", "Check fib(7)", 2, :($student.fib(7) ≈ $golden.fib(7)), "fib(7) is incorrect")
@@ -204,9 +208,9 @@ using Test
         z = y + 3
         """
 
-        p = Problem()            
-        golden = rungolden!(p, goldencode)
-        student = runstudent!(p, studentcode)
+        p = Problem()
+        golden = @rungolden! p goldencode
+        student = @runstudent! p studentcode
 
         grade!(p, "y", "check y", 2, :($student.y ≈ $golden.y), "y is incorrect")
         grade!(p, "z", "check z", 8, :($student.z ≈ $golden.z), "z is incorrect")
@@ -233,17 +237,48 @@ using Test
         a = missing # Area
         p = missing # Perimeter
         """
-        
+
         answer_code = fill_answers(code, Dict(
             :(a = missing) => :(a = π * r^2),
             :(p = missing) => :(p = 2π * r)))
-        
-        
+
         p = Problem()
-        answer = runstudent!(p, answer_code)
+        answer = @runstudent! p answer_code
         grade!(p, "area", "calculate area", 1, :($answer.a ≈ 4π), "area is incorrect")
         grade!(p, "perimeter", "calculate perimeter", 1, :($answer.p ≈ 4π), "perimeter is incorrect")
-        
+
+        @test p.score ≈ 1.0
+    end
+
+    @testset "plot" begin
+        using LinearAlgebra
+
+        studentcode = """
+        using Plots
+        x=1:10
+        y = x.^2
+        xy = plot(x,y)
+        """
+
+        p = Problem()
+        student = @runstudent! p studentcode
+
+        grade!(p, "XY Plot", "Data length", 1,
+            quote
+                xlen = length($student.xy[1][1][:x])
+                ylen = length($student.xy[1][1][:y])
+                xlen == ylen == 10
+            end,
+            "the number of data points in x or y is incorrect")
+
+        grade!(p, "XY Plot", "Y values", 3,
+            quote
+                ynorm = $norm($student.xy[1][1][:y])
+                println(ynorm)
+                ynorm ≈ 159.16343801262903
+            end,
+            "The Y values are not correct")
+
         @test p.score ≈ 1.0
     end
 end

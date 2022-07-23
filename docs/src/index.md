@@ -31,8 +31,8 @@ y = x + x + x
 """
 
 p = Problem()
-golden = rungolden!(p, goldencode)
-student = runstudent!(p, studentcode)
+golden = @rungolden! p goldencode
+student = @runstudent! p studentcode
 
 grade!(p, "y", "check y", 2, :($student.y ≈ $golden.y), "y is incorrect")
 p
@@ -68,8 +68,8 @@ y = x + x + 2x
 """
 
 p = Problem()
-golden = rungolden!(p, goldencode)
-student = runstudent!(p, studentcode)
+golden = @rungolden! p goldencode
+student = @runstudent! p studentcode
 
 grade!(p, "y", "check y", 2, :($student.y ≈ $golden.y), "y is incorrect")
 p.tests[1]
@@ -97,7 +97,7 @@ y = x + x + 2x
 """
 
 p = Problem()
-runstudent!(p, studentcode, [:LinearAlgebra])
+@runstudent! p studentcode [:LinearAlgebra]
 
 p.output[1:63]
 
@@ -122,7 +122,7 @@ xy = plot(x,y)
 """
 
 p = Problem()
-student = runstudent!(p, studentcode)
+student = @runstudent! p studentcode
 
 grade!(p, "XY Plot", "Data length", 1, 
     quote
@@ -145,12 +145,6 @@ pl_JSON(b, p)
 JSON.print(JSON.parse(String(take!(b))), 4)
 
 # output
-┌ Warning: Package Grader does not have Plots in its dependencies:
-│ - If you have Grader checked out for development and have
-│   added Plots as a dependency but haven't updated your primary
-│   environment's manifest file, try `Pkg.resolve()`.
-│ - Otherwise you may need to report an issue with Grader
-└ Loading Plots into Grader from project dependency, future warnings for Grader are suppressed.
 {
     "images": [],
     "score": 1.0,
