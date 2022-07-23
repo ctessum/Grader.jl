@@ -171,7 +171,7 @@ answer_code = fill_answers(code, Dict(
 
 
 p = Problem()
-answer = runstudent!(p, answer_code)
+answer = @runstudent! p answer_code
 grade!(p, "area", "calculate area", 1, :($answer.a ≈ 4π), "area is incorrect")
 grade!(p, "perimeter", "calculate perimeter", 1, :($answer.p ≈ 4π), "perimeter is incorrect")
 
