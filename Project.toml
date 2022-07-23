@@ -1,7 +1,7 @@
 name = "Grader"
 uuid = "d440d0cf-a03a-4c3f-a45e-240b6b8fa1ca"
 authors = ["Christopher Tessum <ctessum@gmail.com> and contributors"]
-version = "0.2.0"
+version = "0.3.0"
 
 [deps]
 Espresso = "6912e4f1-e036-58b0-9138-08d1e6358ea9"
