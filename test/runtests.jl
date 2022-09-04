@@ -298,4 +298,22 @@ using Test
 
         @test p.score ≈ 1.0
     end
+
+    @testset "bug" begin
+        code = """
+        i = let # This would not work if it was begin instead.
+            i=0
+            for group in [1]
+                i=i+1
+            end
+            i
+        end
+        """
+        p = Problem()
+        student = @runstudent! p code
+        grade!(p, "i", "i", 1, :($student.i ≈ 1), "i is incorrect")
+        
+        @test p.score ≈ 1.0
+        @test p.message == ""
+    end
 end
